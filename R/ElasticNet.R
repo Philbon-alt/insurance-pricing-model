@@ -49,5 +49,26 @@ y_hyper_train <- hyper_train_ds$TARGET_AMT
 x_test <- model.matrix(TARGET_AMT ~ ., data = test_ds)[, -1]
 y_test <- test_ds$TARGET_AMT
 
+
+grid <- 10^seq(10, -2, length = 200)
+index <- which(colnames(x_train)=="TARGET_AMT")
+cv.out <- cv.glmnet(x_train, y_train, alpha = 0.5,lambda=grid)
+bestlam <- cv.out$lambda.min
+
 # Fit the Elastic Net model
 alpha <- seq(0,1,0.02)
+
+grid <- 10^seq(10, -2, length = 200)
+
+sortie <- Select_alpha(alpha,x_train, y_train,x_hyper_train,y_hyper_train)
+
+cv.out <- cv.glmnet(x_train, y_train, alpha = sortie[[1]],lambda=grid)
+plot(cv.out)
+bestlam <- cv.out$lambda.min
+
+ENfit <- glmnet(x_train, y_train, alpha = sortie[[1]],lambda=sortie[[2]])
+ENfit$beta
+
+predEN <- predict(ENfit,s=bestlam,newx=x_test)
+
+EN_EQM = EQM(predEN,y_test)
