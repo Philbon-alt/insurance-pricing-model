@@ -42,4 +42,6 @@ lm_model <- lm(TARGET_AMT ~ ., data = train_ds)
 summary(lm_model)
 
 # Save the model
+pred<-predict.lm(lm_model, test_ds)
+LM_EQM<-EQM(pred, test_ds$TARGET_AMT)
 saveRDS(lm_model, file = "models/LinearModel.rds")
