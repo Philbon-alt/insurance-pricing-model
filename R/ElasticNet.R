@@ -1,74 +1,65 @@
 rm(list = ls())
 
+set.seed(0)
+
 library(ISLR2)
 library(glmnet)
-df <- read.csv("data/train_auto.csv")
 source('R/fonction.R')
+df_train <- readRDS('data/clean_train.rds')
+df_test <- readRDS('data/clean_test.rds')
 
-#This ds contains some NULL/empty, I'm gonna relace them with NA
-df[df == ""] <- NA
-
-# For this second model, we will ignore any row that has a missing value
-df <- na.omit(df)
-
-# Convert categorical variables to factors
-df$PARENT1 <- as.factor(df$PARENT1)
-df$MSTATUS <- as.factor(df$MSTATUS)
-df$SEX <- as.factor(df$SEX)
-df$EDUCATION <- as.factor(df$EDUCATION)
-df$JOB <- as.factor(df$JOB)
-df$CAR_TYPE <- as.factor(df$CAR_TYPE)
-df$CAR_USE <- as.factor(df$CAR_USE)
-df$RED_CAR <- as.factor(df$RED_CAR)
-df$REVOKED <- as.factor(df$REVOKED)
-df$URBANICITY <- as.factor(df$URBANICITY)
-
-# Convert the Monetary values to a numeric variable
-df$INCOME <- as.numeric(gsub("[$,]", "", df$INCOME))
-df$HOME_VAL <- as.numeric(gsub("[$,]", "", df$HOME_VAL))
-df$BLUEBOOK <- as.numeric(gsub("[$,]", "", df$BLUEBOOK))
-df$OLDCLAIM <- as.numeric(gsub("[$,]", "", df$OLDCLAIM))
-
-# "Clean" the data by removing non-variable columns
-df <- df[, -c(1, 2)]
+# Removing non-variable columns
+df_train <- df_train[,-c(1, 2)]
 
 # Split the dataset into training, hyper-perameter training and test datasets
-ListSubset<-train_test_split(0.8, df)
-train_ds <- ListSubset[[1]]
-test_ds <- ListSubset[[2]]
 
-ListSubset2 <- train_test_split(0.75, train_ds)
-train_ds <- ListSubset2[[1]]
-hyper_train_ds <- ListSubset2[[2]]
+ListSubset <- train_test_split(0.75, df_train)
+reg_train_ds <- ListSubset[[1]]
+hyper_train_ds <- ListSubset[[2]]
 
 # Prepare the data for glmnet
-x_train <- model.matrix(TARGET_AMT ~ ., data = train_ds)[, -1]
-y_train <- train_ds$TARGET_AMT
-x_hyper_train <- model.matrix(TARGET_AMT ~ ., data = hyper_train_ds)[, -1]
+x_train <- model.matrix(TARGET_AMT ~ ., data = reg_train_ds)[,-1]
+y_train <- reg_train_ds$TARGET_AMT
+x_hyper_train <-
+  model.matrix(TARGET_AMT ~ ., data = hyper_train_ds)[,-1]
 y_hyper_train <- hyper_train_ds$TARGET_AMT
-x_test <- model.matrix(TARGET_AMT ~ ., data = test_ds)[, -1]
-y_test <- test_ds$TARGET_AMT
+x_test <- model.matrix(p_target ~ ., data = df_test)[,-24]
+y_test <- df_test$p_target
 
 
-grid <- 10^seq(10, -2, length = 200)
-index <- which(colnames(x_train)=="TARGET_AMT")
-cv.out <- cv.glmnet(x_train, y_train, alpha = 0.5,lambda=grid)
+grid <- 10 ^ seq(10,-2, length = 200)
+index <- which(colnames(x_train) == "TARGET_AMT")
+cv.out <- cv.glmnet(x_train, y_train, alpha = 0.5, lambda = grid)
 bestlam <- cv.out$lambda.min
 
 # Fit the Elastic Net model
-alpha <- seq(0,1,0.02)
+alpha <- seq(0, 1, 0.02)
 
-grid <- 10^seq(10, -2, length = 200)
+grid <- 10 ^ seq(10,-2, length = 200)
 
-sortie <- Select_alpha(alpha,x_train, y_train,x_hyper_train,y_hyper_train)
+sortie <-
+  Select_alpha(alpha, x_train, y_train, x_hyper_train, y_hyper_train)
 
-cv.out <- cv.glmnet(x_train, y_train, alpha = sortie[[1]],lambda=grid)
+cv.out <-
+  cv.glmnet(x_train, y_train, alpha = sortie[[1]], lambda = grid)
 plot(cv.out)
 bestlam <- cv.out$lambda.min
 
-ENfit <- glmnet(x_train, y_train, alpha = sortie[[1]],lambda=sortie[[2]])
+ENfit <-
+  glmnet(x_train, y_train, alpha = sortie[[1]], lambda = sortie[[2]])
 ENfit$beta
 
-predEN <- predict(ENfit,s=bestlam,newx=x_test)
+x_test <- x_test[,-1]
 
-EN_EQM = EQM(predEN,y_test)
+predEN <- predict(ENfit, s = bestlam, newx = x_test)
+
+EN_EQM = EQM(predEN, y_test)
+
+modeleEN <- list(
+  mod = ENfit,
+  alpha = sortie[[1]],
+  lambda = sortie[[2]],
+  bestlam = bestlam
+)
+
+saveRDS(modeleEN, file = "models/ElasticNetModel.rds")
