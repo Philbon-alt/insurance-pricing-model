@@ -2,8 +2,12 @@ rm(list = ls())
 
 library(glmnet)
 
-df <- read.csv("data/train_auto.csv")
 source('R/fonction.R')
+df_train <- readRDS('data/clean_train.rds')
+df_test <- readRDS('data/clean_test.rds')
+
+# Removing non-variable columns
+df_train <- df_train[,-c(1, 2)]
 
 #This ds contains some NULL/empty, I'm gonna relace them with NA
 df[df == ""] <- NA
