@@ -65,11 +65,6 @@ saveRDS(merged, file = "data/clean_test.rds")
 df_na <- read.csv("data/train_auto.csv")
 df_na[df_na == ""] <- NA
 
-#df_na[115]$job
-#df_na$job
-#df_na[["JOB"]]
-
-
 cat_vars <- c("PARENT1", "MSTATUS", "SEX", "EDUCATION", "JOB",
               "CAR_TYPE", "CAR_USE", "RED_CAR", "REVOKED", "URBANICITY")
 
@@ -109,14 +104,17 @@ df_na3 <- read.csv("data/SHELL_AUTO.csv")
 merged_na <- merge.data.frame(df_na2, df_na3, by="INDEX")
 merged_na <- merged_na[,-c(1,2,3)]
 
-for (var in cat_vars) {
-  if (var %in% names(merged_na)) {
-    merged_na[[var]] <- as.character(merged_na[[var]])
-    merged_na[[var]][is.na(merged_na[[var]])] <- "Missing"
-    merged_na[[var]] <- as.factor(merged_na[[var]])
+merged_na[merged_na == ""] <- NA
+
+for (v in cat_vars) {
+  if (v %in% names(merged_na)) {
+    merged_na[[v]] <- as.character(merged_na[[v]])
+    merged_na[[v]][is.na(merged_na[[v]])] <- "Missing"
+    merged_na[[v]] <- as.factor(merged_na[[v]])
   }
 }
 merged_na <- na.omit(merged_na)
+
 # Convert categorical variables to factors
 merged_na$PARENT1 <- as.factor(merged_na$PARENT1)
 merged_na$MSTATUS <- as.factor(merged_na$MSTATUS)
@@ -128,10 +126,14 @@ merged_na$CAR_USE <- as.factor(merged_na$CAR_USE)
 merged_na$RED_CAR <- as.factor(merged_na$RED_CAR)
 merged_na$REVOKED <- as.factor(merged_na$REVOKED)
 merged_na$URBANICITY <- as.factor(merged_na$URBANICITY)
+
 # Convert the Monetary values to a numeric variable
 merged_na$INCOME <- as.numeric(gsub("[$,]", "", merged_na$INCOME))
 merged_na$HOME_VAL <- as.numeric(gsub("[$,]", "", merged_na$HOME_VAL))
 merged_na$BLUEBOOK <- as.numeric(gsub("[$,]", "", merged_na$BLUEBOOK))
 merged_na$OLDCLAIM <- as.numeric(gsub("[$,]", "", merged_na$OLDCLAIM))
+
 # Save this as Clean data with NA categories
+merged_na <- na.omit(merged_na)
+
 saveRDS(merged_na, file = "data/clean_test_na.rds")
