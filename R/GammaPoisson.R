@@ -29,3 +29,21 @@ summary(model)
 pred <- predict.glm(model, df_test)
 EQM_PG <- EQM(df_test$p_target, pred)
 EQM_PG
+
+#try with the na categories databank
+df_train_na <- readRDS('data/clean_train_na.rds')
+df_test_na <- readRDS('data/clean_test_na.rds')
+df_train_na$TIF[df_train_na$TIF <= 0 | is.na(df_train_na$TIF)] <- 0.01
+df_test_na$TIF[df_test_na$TIF <= 0 | is.na(df_test_na$TIF)] <- 0.01
+df_train_na$exp <- (df_train_na$TIF) / (max(df_train_na$TIF))
+df_test_na$exp <- (df_test_na$TIF) / (max(df_test_na$TIF))
+df_train_na <- df_train_na[,-c(1,2) ]
+
+# Fit the Gamma-Poisson model with na categories
+modelna <- glm(TARGET_AMT ~ KIDSDRIV + offset(log(exp)) + AGE + HOMEKIDS + YOJ + INCOME + PARENT1 + HOME_VAL + MSTATUS + SEX + EDUCATION + JOB + TRAVTIME + CAR_USE + BLUEBOOK + CAR_TYPE + RED_CAR + OLDCLAIM + CLM_FREQ + REVOKED + MVR_PTS + CAR_AGE + URBANICITY  , data = df_train_na)
+
+summary(modelna)
+
+predna <- predict.glm(modelna, df_test_na)
+EQM_PG_na <- EQM(df_test_na$p_target, predna)
+EQM_PG_na
