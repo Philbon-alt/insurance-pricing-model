@@ -121,8 +121,6 @@ ENfit2 <-
   glmnet(x_train2, y_train2, alpha = sortie2[[1]], lambda = sortie2[[2]])
 ENfit2$beta
 
-x_test2 <- x_test2[,-1]
-x_test2
 predEN2 <- predict(ENfit2, s = bestlam2, newx = x_test2)
 
 EN_EQM_na = EQM(predEN2, y_test2)
@@ -141,3 +139,6 @@ df_en2 <- sum(coef_en2 != 0) - 1
 AIC_EN_na <- n2 * log(mse2) + 2 * df_en2
 
 AIC_EN_na
+
+results_EN <- list(model = "Elastic Net", EQM = EN_EQM, EQM_na = EN_EQM_na, AIC = AIC_EN, AIC_na = AIC_EN_na)
+saveRDS(results_EN, 'output/results_EN.rds')
