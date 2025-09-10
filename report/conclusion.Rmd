@@ -1,0 +1,17 @@
+---
+title: "Pricing Model Conclusion"
+author: "Philippe Thibodeau"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+# Objective
+The objective of this report is to summarize the difference and similarity between different prediction methods. The analysis is focused on the factors considered useful to predict the financial risk of the insurrance.
+
+# Summary of the models
+The models used in this analysis are:
+- Complete linear model
+- Elastic net
+- Gamma-Poisson model
