@@ -38,3 +38,5 @@ pred_na <- predict.lm(lm_model_na, df_test_na)
 LM_EQM_na <- EQM(pred_na, df_test_na$p_target)
 LM_EQM_na < LM_EQM
 
+results_lm <- list(model = "Linear Model", EQM = LM_EQM, EQM_na = LM_EQM_na, AIC = AIC(lm_model), AIC_na = AIC(lm_model_na))
+saveRDS(results_lm, 'output/results_lm.rds')

@@ -47,3 +47,7 @@ summary(modelna)
 predna <- predict.glm(modelna, df_test_na)
 EQM_PG_na <- EQM(df_test_na$p_target, predna)
 EQM_PG_na
+
+# Save the results
+results_PG <- list(model = "Gamma-Poisson", EQM = EQM_PG, EQM_na = EQM_PG_na, AIC = AIC(model), AIC_na = AIC(modelna))
+saveRDS(results_PG, 'output/results_PG.rds')
