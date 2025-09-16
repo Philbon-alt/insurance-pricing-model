@@ -8,10 +8,28 @@ output:
 ---
 
 # Objective
-The objective of this report is to summarize the difference and similarity between different prediction methods. The analysis is focused on the factors considered useful to predict the financial risk of the insurrance.
+
+The objective of this report is to summarize the difference and similarity between different prediction methods. The analysis is focused on the factors considered useful to predict the financial risk of the insurance.
 
 # Summary of the models
-The models used in this analysis are:
-- Complete linear model
-- Elastic net
-- Gamma-Poisson model
+
+The models used in this analysis are: - Complete linear model - Elastic net - Gamma-Poisson model
+
+The models were evaluated based on their MSE (mean squared error) and AIC (Akaike Information Criterion) values. The results are summarized in the table below:
+
+```{r results='asis', echo=TRUE}
+results_lm <- readRDS('../output/results_lm.rds')
+results_en <- readRDS('../output/results_EN.rds')
+results_pg <- readRDS('../output/results_PG.rds')
+results <- rbind(results_lm, results_en, results_pg)
+library(gt)
+library(dplyr)
+
+results <- bind_rows(results_lm, results_en, results_pg)
+
+results |> 
+  gt() |> 
+  fmt_number(where(is.numeric), decimals = 2) |> 
+  tab_caption("Model Comparison Results")
+
+```
