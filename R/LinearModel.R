@@ -6,6 +6,7 @@ df_test <- readRDS('data/clean_test.rds')
 
 # Removing non-variable columns
 df_train <- df_train[,-c(1, 2)]
+df_test <- df_test[,-c(1, 2)]
 
 # Linear Regression Model
 lm_model <- lm(TARGET_AMT ~ ., data = df_train)
@@ -26,6 +27,7 @@ df_test_na <- readRDS('data/clean_test_na.rds')
 
 # Removing non-variable columns
 df_train_na <- df_train_na[,-c(1, 2)]
+df_test_na <- df_test_na[,-c(1, 2)]
 
 # Linear Regression Model with NAs as categories
 lm_model_na <- lm(TARGET_AMT ~ ., data = df_train_na)
