@@ -15,7 +15,7 @@ summary(lm_model)
 
 # Save the model
 pred <- predict.lm(lm_model, df_test)
-LM_EQM <- EQM(pred, df_test$p_target)
+LM_EQM <- EQM(pred, df_test$TARGET_AMT)
 LM_EQM
 
 saveRDS(lm_model, file = "models/LinearModel.rds")
@@ -35,8 +35,15 @@ summary(lm_model_na)
 
 # Let's try the precision now
 pred_na <- predict.lm(lm_model_na, df_test_na)
-LM_EQM_na <- EQM(pred_na, df_test_na$p_target)
+LM_EQM_na <- EQM(pred_na, df_test_na$TARGET_AMT)
 LM_EQM_na < LM_EQM
 
-results_lm <- list(model = "Linear Model", EQM = LM_EQM, EQM_na = LM_EQM_na, AIC = AIC(lm_model), AIC_na = AIC(lm_model_na))
+# Test with the mean
+df_mean <- readRDS("data/mean_test.rds")
+df_na_mean <- readRDS("data/mean_test_na.rds")
+
+pred_mean <- mean(predict.lm(lm_model, df_mean))
+pred_na_mean <- mean(predict.lm(lm_model_na, df_na_mean))
+
+results_lm <- list(model = "Linear Model", EQM = LM_EQM, EQM_na = LM_EQM_na, MEAN = pred_mean, MEAN_na = pred_na_mean, AIC = AIC(lm_model), AIC_na = AIC(lm_model_na))
 saveRDS(results_lm, 'output/results_lm.rds')
