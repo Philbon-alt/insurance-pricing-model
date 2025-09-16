@@ -10,6 +10,7 @@ df_test <- readRDS('data/clean_test.rds')
 
 # Removing non-variable columns
 df_train <- df_train[,-c(1, 2)]
+df_test <- df_test[,-c(1, 2)]
 
 # Split the dataset into training, hyper-perameter training and test datasets
 
@@ -23,9 +24,10 @@ y_train <- reg_train_ds$TARGET_AMT
 x_hyper_train <-
   model.matrix(TARGET_AMT ~ ., data = hyper_train_ds)[,-1]
 y_hyper_train <- hyper_train_ds$TARGET_AMT
-x_test <- model.matrix(p_target ~ ., data = df_test)[,-24]
-y_test <- df_test$p_target
+x_test <- model.matrix(TARGET_AMT ~ ., data = df_test)#[,-24]
+y_test <- df_test$TARGET_AMT
 
+#ncol(x_test)
 
 grid <- 10 ^ seq(10,-2, length = 200)
 index <- which(colnames(x_train) == "TARGET_AMT")
@@ -72,7 +74,6 @@ AIC_EN <- n * log(mse) + 2 * df_en
 
 AIC_EN
 
-
 #===============================================================
 # NA section
 set.seed(0)
@@ -82,6 +83,7 @@ df_test2 <- readRDS('data/clean_test_na.rds')
 
 # Removing non-variable columns
 df_train2 <- df_train2[,-c(1, 2)]
+df_test2 <- df_test2[,-c(1, 2)]
 
 # Split the dataset into training, hyper-perameter training and test datasets
 
@@ -95,8 +97,8 @@ y_train2 <- reg_train_ds2$TARGET_AMT
 x_hyper_train2 <-
   model.matrix(TARGET_AMT ~ ., data = hyper_train_ds2)[,-1]
 y_hyper_train2 <- hyper_train_ds2$TARGET_AMT
-x_test2 <- model.matrix(p_target ~ ., data = df_test2)[,-24]
-y_test2 <- df_test2$p_target
+x_test2 <- model.matrix(TARGET_AMT ~ ., data = df_test2)#[,-24]
+y_test2 <- df_test2$TARGET_AMT
 
 
 grid <- 10 ^ seq(10,-2, length = 200)
@@ -121,6 +123,7 @@ ENfit2 <-
   glmnet(x_train2, y_train2, alpha = sortie2[[1]], lambda = sortie2[[2]])
 ENfit2$beta
 
+x_test2 <- x_test2[,-1]
 predEN2 <- predict(ENfit2, s = bestlam2, newx = x_test2)
 
 EN_EQM_na = EQM(predEN2, y_test2)
@@ -139,6 +142,18 @@ df_en2 <- sum(coef_en2 != 0) - 1
 AIC_EN_na <- n2 * log(mse2) + 2 * df_en2
 
 AIC_EN_na
+
+# Mean test
+
+df_mean <- readRDS("data/mean_test.rds")
+df_na_mean <- readRDS("data/mean_test_na.rds")
+
+x_mean <- model.matrix(p_target ~ ., data = df_mean)[,-1]
+ncol(x_mean)
+predMEAN <- predict(ENfit, s = bestlam, newx = x_mean)
+
+summary(x_mean)
+summary(x_test)
 
 results_EN <- list(model = "Elastic Net", EQM = EN_EQM, EQM_na = EN_EQM_na, AIC = AIC_EN, AIC_na = AIC_EN_na)
 saveRDS(results_EN, 'output/results_EN.rds')
